@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mijn Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Login Screen */
+        .login-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .login-container h1 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        /* Main Dashboard */
+        .dashboard-container {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .dashboard-header h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .add-link-form {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .add-link-form input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+        }
+
+        .add-link-form input:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .logout-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            float: right;
+        }
+
+        /* Link Grid */
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .link-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 160px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+
+        .link-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .link-card .icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .link-card .title {
+            color: #333;
+            font-weight: 600;
+            text-align: center;
+            word-break: break-word;
+            flex: 1;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .link-card:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 3rem;
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-container" id="loginScreen">
+        <h1>🔐 Login</h1>
+        <input type="text" id="username" class="login-input" placeholder="Gebruikersnaam" autocomplete="username">
+        <input type="password" id="password" class="login-input" placeholder="Wachtwoord" autocomplete="current-password">
+        <button class="login-btn" onclick="checkLogin()">Login</button>
+        <p class="error-message" id="errorMessage">Onjuiste gebruikersnaam of wachtwoord</p>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="dashboard-container" id="dashboard">
+        <div class="dashboard-header">
+            <button class="logout-btn" onclick="logout()">Logout</button>
+            <h1>⚡ Mijn Snelkoppelingen</h1>
+            <form class="add-link-form" onsubmit="addLink(event)">
+                <input type="text" id="linkName" placeholder="Naam (bv. YouTube)" required>
+                <input type="url" id="linkUrl" placeholder="URL (bv. https://youtube.com)" required>
+                <button type="submit" class="add-btn">+ Toevoegen</button>
+            </form>
+        </div>
+
+        <div class="links-grid" id="linksGrid">
+            <div class="empty-state">Geen snelkoppelingen. Voeg er hierboven een toe!</div>
+        </div>
+    </div>
+
+    <script>
+        // Credentials (let op: niet veilig voor productie!)
+        const VALID_USERNAME = 'martijn';
+        const VALID_PASSWORD = 'ronsmans';
+
+        // Load links from localStorage
+        let links = JSON.parse(localStorage.getItem('myLinks') || '[]');
+
+        // Check login on load
+        window.onload = function() {
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                showDashboard();
+            }
+        };
+
+        function checkLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+                sessionStorage.setItem('isLoggedIn', 'true');
+                showDashboard();
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('isLoggedIn');
+            location.reload();
+        }
+
+        function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            renderLinks();
+        }
+
+        function addLink(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('linkName').value.trim();
+            let url = document.getElementById('linkUrl').value.trim();
+
+            // Add https if missing
+            if (!/^https?:\/\//i.test(url)) {
+                url = 'https://' + url;
+            }
+
+            const link = {
+                id: Date.now(),
+                name: name,
+                url: url,
+                icon: getRandomIcon(name)
+            };
+
+            links.push(link);
+            saveLinks();
+            renderLinks();
+            
+            // Clear form
+            document.getElementById('linkName').value = '';
+            document.getElementById('linkUrl').value = '';
+        }
+
+        function deleteLink(id) {
+            if (confirm('Verwijder deze snelkoppeling?')) {
+                links = links.filter(link => link.id !== id);
+                saveLinks();
+                renderLinks();
+            }
+        }
+
+        function saveLinks() {
+            localStorage.setItem('myLinks', JSON.stringify(links));
+        }
+
+        function renderLinks() {
+            const grid = document.getElementById('linksGrid');
+            
+            if (links.length === 0) {
+                grid.innerHTML = '<div class="empty-state">Geen snelkoppelingen. Voeg er hierboven een toe!</div>';
+                return;
+            }
+
+            grid.innerHTML = links.map(link => `
+                <a href="${link.url}" target="_blank" class="link-card">
+                    <span class="delete-btn" onclick="event.preventDefault(); deleteLink(${link.id})">×</span>
+                    <span class="icon">${link.icon}</span>
+                    <span class="title">${escapeHtml(link.name)}</span>
+                </a>
+            `).join('');
+        }
+
+        function getRandomIcon(name) {
+            const icons = ['🌐', '🔗', '📱', '💻', '🎮', '📺', '🎵', '📧', '💼', '📚'];
+            return icons[name.length % icons.length];
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
